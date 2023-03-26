@@ -53,8 +53,8 @@ def respond_to_mention(event, say):
     # 質問に対する回答を取得する
     try:
         result = qa.run(event['text'])
-    except:
-        result = {'answer_text': '質問に答えられませんでした。', 'source_documents': []}
+    except Exception as e:
+        result = {'answer_text': f'エラーがおきました :しゅん: \n```{e.args}\n```', 'source_documents': []}
 
     # 返信するメッセージを作成
     message = _message_builder(event, result)
