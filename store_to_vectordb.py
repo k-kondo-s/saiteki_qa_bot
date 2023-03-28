@@ -20,6 +20,7 @@ class VectorStore():
     - delete_all_indexes: すべてのインデックスを削除します。
     - store_to_vectoredb: ドキュメントをベクトル化し、ベクトルストアに保存します。
     """
+
     def __init__(self):
         """
         VectorStore インスタンスを初期化します。環境変数から Pinecone の API キーと環境を取得し、Pinecone を初期化します。
@@ -70,6 +71,7 @@ class SaitekiManualHandler():
     - split_documents: ドキュメントを分割します。
     - get_documents_from_urls: 与えられた URL からドキュメントを取得します。
     """
+
     def __init__(self) -> None:
         """
         SaitekiManualHandler インスタンスを初期化します。
@@ -239,10 +241,6 @@ class SaitekiManualHandler():
 
 if __name__ == '__main__':
 
-    # vector store の中を全部削除する
-    store = VectorStore()
-    store.delete_all_indexes()
-
     # 与えた url から順に辿って、食わせたいページの document を取得する
     # これらのページはサポートページトップの「最適ワークス」「サービスマネージャー」「よくある質問(FAQ)」のページ
     root_urls = [
@@ -253,5 +251,8 @@ if __name__ == '__main__':
     handler = SaitekiManualHandler()
     documents = handler.get_documents_from_urls(root_urls)
 
+    # vector store の中を全部削除したあと、
     # document をベクトル化して vectore store に保存する
+    store = VectorStore()
+    store.delete_all_indexes()
     store.store_to_vectoredb(documents)

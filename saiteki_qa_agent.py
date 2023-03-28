@@ -50,7 +50,6 @@ class SaitekiQaAgent():
             api_key=self.pinecone_api_key,
             environment=self.pinecone_env,
         )
-        print(self.pinecone_index_name)
         vectorstore = Pinecone.from_existing_index(
             index_name=self.pinecone_index_name, embedding=embeddings)
 
