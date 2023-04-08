@@ -1,11 +1,41 @@
 # %%
 import os
+from typing import Any, List, Optional
 
+import pinecone
 from langchain.chains import RetrievalQA
 from langchain.chat_models import ChatOpenAI
+from langchain.docstore.document import Document
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.vectorstores import Pinecone
-import pinecone
+
+
+class PineconeWithScore(Pinecone):
+    """
+    PineconeWithScore は、Pinecone を継承したクラスです。Pinecone には、検索結果のスコアを取得する機能がないため、
+    このクラスを使用することで、検索結果のスコアを取得できるようになります。
+    """
+
+    def similarity_search(self,
+                          query: str,
+                          k: int = 5,
+                          filter: Optional[dict] = None,
+                          namespace: Optional[str] = None,
+                          **kwargs: Any) -> List[Document]:
+        """
+        指定したクエリに最も近いドキュメントを Pinecone から取得します。
+        このメソッドは、Pinecone の similarity_search メソッドをオーバーライドしています。
+        """
+        # 検索結果のスコアを取得する
+        docs_with_score = super().similarity_search_with_score(
+            query, k, filter, namespace, **kwargs)
+
+        # 検索結果のスコアをドキュメントに追加する
+        docs = []
+        for doc, score in docs_with_score:
+            doc.metadata['score'] = score
+            docs.append(doc)
+        return docs
 
 
 class SaitekiQaAgent():
@@ -50,7 +80,7 @@ class SaitekiQaAgent():
             api_key=self.pinecone_api_key,
             environment=self.pinecone_env,
         )
-        vectorstore = Pinecone.from_existing_index(
+        vectorstore = PineconeWithScore.from_existing_index(
             index_name=self.pinecone_index_name, embedding=embeddings)
 
         # qa chain を作成
@@ -84,8 +114,11 @@ class SaitekiQaAgent():
         answer = self.qa_chain(prompt)
         result['answer_text'] = answer['result']
         result['source_documents'] = [
-            {'title': source_doc.metadata['title'],
-                'url': source_doc.metadata['source']}
+            {
+                'title': source_doc.metadata['title'],
+                'url': source_doc.metadata['source'],
+                'score': source_doc.metadata['score']
+            }
             for source_doc in answer['source_documents']
         ]
         return result

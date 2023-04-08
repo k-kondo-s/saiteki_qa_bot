@@ -37,10 +37,12 @@ def _message_builder(event, result):
     message = f'<@{event["user"]}>\n'
     message += f'{result["answer_text"]}\n\n'
     if len(result['source_documents']) > 0:
-        message += '関連記事:\n'
+        message += '関連記事(関連度%):\n'
         for source_document in result['source_documents']:
-            title, url = source_document['title'], source_document['url']
-            message += f'- <{url}|{title}>\n'
+            title, url, score = source_document['title'], source_document['url'], source_document['score']
+            # score を小数点以下2桁に丸めて文字列にする
+            score = str(int((round(score, 2) * 100)))
+            message += f'- <{url}|{title}({score}%)>\n'
     return message
 
 
@@ -54,7 +56,8 @@ def respond_to_mention(event, say):
     try:
         result = qa.run(event['text'])
     except Exception as e:
-        result = {'answer_text': f'エラーがおきました :しゅん: \n```{e.args}\n```', 'source_documents': []}
+        result = {'answer_text': f'エラーがおきました :しゅん: \n```{e.args}\n```',
+                  'source_documents': []}
 
     # 返信するメッセージを作成
     message = _message_builder(event, result)
