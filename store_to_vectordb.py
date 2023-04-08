@@ -234,9 +234,9 @@ class SaitekiManualHandler():
         documents = self._generate_documents(content_urls)
 
         # documents を分割する
-        splitted_documents = self.split_documents(documents)
+        # splitted_documents = self.split_documents(documents)
 
-        return splitted_documents
+        return documents
 
 
 if __name__ == '__main__':
