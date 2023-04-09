@@ -171,9 +171,11 @@ class SaitekiManualHandler():
         # ページタイトルを取得。'工程デザイナーご利用の流れ – saiteki.works サポートサイト'
         # という形式なので、' – ' で分割して、先頭の要素を取得する
         title = soup.find('title').text.split(' – ')[0]
+        # soup から div.article-body を取得する
+        body_text = soup.find('div', class_='article-body').text
         # ページ本文から document を作る
         metadata = {"source": url, 'title': title}
-        document = Document(page_content=soup.text, metadata=metadata)
+        document = Document(page_content=body_text, metadata=metadata)
         return document
 
     def _generate_documents(self, page_urls):
